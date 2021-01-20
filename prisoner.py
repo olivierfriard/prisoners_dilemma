@@ -75,8 +75,6 @@ def action(player_action, player_id, room_id, session_idx):
                    (str(results), room_id))
     connection.commit()
 
-    print(player_id, results)
-
     if len(results[session_idx]) < 2:
         wait = True
         content = ""
@@ -158,11 +156,18 @@ def rooms(player_id):
 
     content = ""
     for row in rows:
-        results = results_dict(row['results'])
+        results = results_dict(row["results"])
+        # check number of played sessions
         played = len([x for x in results if len(results[x]) == 2])
+        # check if opponent is waiting
+        opponent_is_waiting = "Yes" if len([x for x in results if len(results[x]) == 1 and player_id not in results[x]]) else "No"
+
+
         to_be_played = row["session_number"] - played
         content += (f'<tr><td><a href="{suffix}/room/{player_id}/{row["room"]}">room #{row["room"]}</a></td>'
-                    f'<td>{row["session_number"]}</td><td>{played}</td><td>{to_be_played}</td></tr>'
+                    f'<td>{row["session_number"]}</td><td>{played}</td><td>{to_be_played}</td>'
+                    f'<td>{opponent_is_waiting}</td>'
+                    '</tr>'
                     ) 
 
     if rows:

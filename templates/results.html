@@ -18,6 +18,12 @@
     <h2>Room #{{ room_id }}</h2>
     <h3>player {{ player_id }}</h3>
 
+
+  <p>
+  <a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >return to the rooms list</a>
+  </p>
+      
+
 {% if wait %}
 <h3>Please wait for the other partecipant</h3>
 
@@ -34,9 +40,6 @@
 </p>
 {% endif %}
 
-<p>
-<a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >return to the rooms list</a>
-</p>
 
 </div>
 
