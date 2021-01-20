@@ -60,7 +60,7 @@ def action(player_action, player_id, room_id, session_idx):
     connection = sqlite3.connect("prisoner_dilemma.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    cursor.execute(("SELECT room, player1, player2, session_number, session_played, results "
+    cursor.execute(("SELECT room, player1, player2, session_number, results "
                     "FROM games WHERE room = ?"),
                    (room_id, ))
     row = cursor.fetchone()
@@ -104,7 +104,7 @@ def room(player_id, room_id):
     connection = sqlite3.connect("prisoner_dilemma.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    cursor.execute(("SELECT room, player1, player2, session_number, show_picture, session_played, results "
+    cursor.execute(("SELECT room, player1, player2, session_number, picture, results "
                     "FROM games WHERE room = ?"),
                    (room_id, ))
     row = cursor.fetchone()
@@ -125,7 +125,7 @@ def room(player_id, room_id):
         return redirect(f"{suffix}/action/{results[session_idx][player_id]}/{player_id}/{room_id}/{session_idx}") 
     else:
         opponent = row["player1"] if row["player1"] != player_id else row["player2"]
-        if row["show_picture"]:
+        if row["picture"] == "show":
             picture = (f'<img id="imageID" src="/static/pictures/{opponent}.jpeg">\n'
                        f'<script src="/static/hide_image.js"></script>')
         else:
@@ -149,7 +149,7 @@ def rooms(player_id):
     connection = sqlite3.connect("prisoner_dilemma.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    cursor.execute(("SELECT room, player1, player2, session_number, session_played, results "
+    cursor.execute(("SELECT room, player1, player2, session_number, results "
                     "FROM games WHERE player1 = ? OR player2 = ?"),
                    (player_id, player_id,))
     rows = cursor.fetchall()
@@ -233,7 +233,7 @@ def monitor():
     connection = sqlite3.connect("prisoner_dilemma.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    rows = cursor.execute("SELECT room, player1, player2, session_number, session_played, results FROM games").fetchall()
+    rows = cursor.execute("SELECT room, player1, player2, session_number, results FROM games").fetchall()
 
     content = f""
     for row in rows:
