@@ -188,8 +188,6 @@ def rooms(player_id):
 def func_player_id():
     if request.method == "POST":
         player_id = request.form["player_id"]
-        print(player_id)
-
 
         connection = sqlite3.connect("prisoner_dilemma.db")
         connection.row_factory = sqlite3.Row
@@ -200,9 +198,13 @@ def func_player_id():
         if not row:
             return f"Player {player_id} not found"
 
+    return redirect(f"{suffix}/rooms/{player_id}")
+
+    '''
     return render_template("player.html",
                            player_id=player_id
                          )
+    '''
 
 
 @app.route(f'{suffix}/admin')
