@@ -27,7 +27,8 @@
 {% if wait %}
 <h3>Please wait for the other partecipant</h3>
 
-<img src="/static/wait.gif">
+
+<img src="{{ url_for('static', filename='wait.gif') }}">
 
 {% else %}
    {{ content }}

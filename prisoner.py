@@ -25,7 +25,8 @@ Copyright 2021 Olivier Friard
 suffix="/prisoner"
 
 from flask import Flask, render_template, Markup, redirect, request
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path=f'{suffix}/static')
+
 app.debug = True
 
 import sqlite3
@@ -126,8 +127,8 @@ def room(player_id, room_id):
     else:
         opponent = row["player1"] if row["player1"] != player_id else row["player2"]
         if row["picture"] == "show":
-            picture = (f'<img id="imageID" src="/static/pictures/{opponent}.jpeg">\n'
-                       f'<script src="/static/hide_image.js"></script>')
+            picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpeg">\n'
+                       f'<script src="{app.static_url_path}/hide_image.js"></script>')
         else:
             picture = ""
 
@@ -217,7 +218,7 @@ def admin():
 
     content = '<table class="table"><thead><tr><th>Players</th><th>Pictures</th><th>URL FOR rooms list</th></tr><thead>'
     for row in rows:
-        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="/static/pictures/{row["id"]}.jpeg"></td><td>{row["id"]}</td></tr>'
+        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="{app.static_url_path}/pictures/{row["id"]}.jpeg"></td><td>{row["id"]}</td></tr>'
 
     return render_template("admin.html",
                            content = Markup(content),
