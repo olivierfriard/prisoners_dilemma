@@ -13,7 +13,7 @@ if(document.getElementById(id).style.opacity<=0) clearInterval(window.timerID);
 }, laps);
 }
 
-window.onload = function(){hide_image("imageID", 10000);}
+
 
 
 

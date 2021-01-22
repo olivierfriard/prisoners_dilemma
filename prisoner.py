@@ -105,7 +105,7 @@ def room(player_id, room_id):
     connection = sqlite3.connect("prisoner_dilemma.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    cursor.execute(("SELECT room, player1, player2, session_number, picture, results "
+    cursor.execute(("SELECT room, player1, player2, session_number, show_picture, results "
                     "FROM games WHERE room = ?"),
                    (room_id, ))
     row = cursor.fetchone()
@@ -126,17 +126,21 @@ def room(player_id, room_id):
         return redirect(f"{suffix}/action/{results[session_idx][player_id]}/{player_id}/{room_id}/{session_idx}") 
     else:
         opponent = row["player1"] if row["player1"] != player_id else row["player2"]
-        if row["picture"] == "show":
-            picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpeg">\n'
+        if row["show_picture"]:
+            picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
                        f'<script src="{app.static_url_path}/hide_image.js"></script>')
+            hide_image = f'<script>window.onload = function() {{ hide_image("imageID", {row["show_picture"] * 1000}); }}</script>'
+        
         else:
             picture = ""
+            hide_image = ""
 
         return render_template("room.html",
                            room_id=room_id,
                            session_idx=session_idx,
                            player_id=player_id,
                            opponent=opponent,
+                           hide_image=Markup(hide_image),
                            picture=Markup(picture),
                            suffix=suffix
                            )
@@ -220,7 +224,7 @@ def admin():
 
     content = '<table class="table"><thead><tr><th>Players</th><th>Pictures</th><th>URL FOR rooms list</th></tr><thead>'
     for row in rows:
-        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="{app.static_url_path}/pictures/{row["id"]}.jpeg"></td><td>{row["id"]}</td></tr>'
+        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="{app.static_url_path}/pictures/{row["id"]}.jpg"></td><td>{row["id"]}</td></tr>'
 
     return render_template("admin.html",
                            content = Markup(content),
@@ -236,7 +240,7 @@ def monitor():
     connection = sqlite3.connect("prisoner_dilemma.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    rows = cursor.execute("SELECT room, player1, player2, session_number, results FROM games").fetchall()
+    rows = cursor.execute("SELECT room, player1, player2, session_number, show_picture, results FROM games").fetchall()
 
     content = f""
     for row in rows:
@@ -248,11 +252,12 @@ def monitor():
         payoff_p2 = 0
         for x in results:
             if len(results[x]) == 2:
-                payoff_p1 += payoff(results[x][row['player1']], results[x][row['player2']])
-                payoff_p2 += payoff(results[x][row['player2']], results[x][row['player1']])
+                payoff_p1 += payoff(results[x][row["player1"]], results[x][row["player2"]])
+                payoff_p2 += payoff(results[x][row["player2"]], results[x][row["player1"]])
 
-        content += (f"Room #{row['room']}  players: {row['player1']}, {row['player2']}  "
-                    f"Number of sessions: {row['session_number']}  (played: {n_played})"
+        content += (f"Room #{row['room']} "
+                    f"Number of sessions: {row['session_number']}  (played: {n_played}) "
+                    f"Show picture of player: {row['show_picture']} s"
                    )
 
         content += '<table class="table">'
