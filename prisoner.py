@@ -35,13 +35,13 @@ actions_list = {"C": "cooperate", "D": "defect"}
 
 def payoff(current_player, other_player):
     if current_player == "C" and other_player == "C":
-        return 200
+        return 3
     if current_player == "C" and other_player == "D":
-        return 0
+        return 1
     if current_player == "D" and other_player == "C":
-        return 300
+        return 4
     if current_player == "D" and other_player == "D":
-        return 100
+        return 2
     return 0
 
 
