@@ -127,10 +127,18 @@ def room(player_id, room_id):
     else:
         opponent = row["player1"] if row["player1"] != player_id else row["player2"]
         if row["show_picture"]:
+
+            '''
             picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
                        f'<script src="{app.static_url_path}/hide_image.js"></script>')
+            '''
+            picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
+
+            '''
             hide_image = f'<script>window.onload = function() {{ hide_image("imageID", {row["show_picture"] * 1000}); }}</script>'
-        
+            '''
+            hide_image = ""
+
         else:
             picture = ""
             hide_image = ""

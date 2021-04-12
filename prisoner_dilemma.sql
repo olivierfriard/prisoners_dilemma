@@ -25,10 +25,10 @@ CREATE TABLE games (
 INSERT INTO games 
 (room, player1, player2, session_number, show_picture) VALUES
 
-('1', 'bilbo', 'gandalf', 25, 0),
-('2', 'bilbo', 'aragorn', 25, 0),
-('3', 'bilbo', 'sauron', 25, 0),
-('4', 'gandalf', 'aragorn', 25, 0),
-('5', 'gandalf', 'sauron', 25, 0),
-('6', 'aragorn', 'sauron', 25, 0);
+('1', 'bilbo', 'gandalf', 10, 20),
+('2', 'bilbo', 'aragorn', 10, 0),
+('3', 'bilbo', 'sauron', 10, 0),
+('4', 'gandalf', 'aragorn', 10, 0),
+('5', 'gandalf', 'sauron', 10, 0),
+('6', 'aragorn', 'sauron', 10, 0);
 
