@@ -123,21 +123,21 @@ def room(player_id, room_id):
         results[session_idx] = {}
 
     if player_id in results[session_idx]:
-        return redirect(f"{suffix}/action/{results[session_idx][player_id]}/{player_id}/{room_id}/{session_idx}") 
+        return redirect(f"{suffix}/action/{results[session_idx][player_id]}/{player_id}/{room_id}/{session_idx}")
     else:
         opponent = row["player1"] if row["player1"] != player_id else row["player2"]
         if row["show_picture"]:
 
-            '''
+
             picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
                        f'<script src="{app.static_url_path}/hide_image.js"></script>')
-            '''
-            picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
 
-            '''
+            # picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
+
+
             hide_image = f'<script>window.onload = function() {{ hide_image("imageID", {row["show_picture"] * 1000}); }}</script>'
-            '''
-            hide_image = ""
+
+            # hide_image = ""
 
         else:
             picture = ""
@@ -153,7 +153,7 @@ def room(player_id, room_id):
                            suffix=suffix
                            )
 
- 
+
 @app.route(f'{suffix}/rooms/<player_id>')
 def rooms(player_id):
     """
@@ -181,7 +181,7 @@ def rooms(player_id):
                     f'<td>{row["session_number"]}</td><td>{played}</td><td>{to_be_played}</td>'
                     f'<td>{opponent_is_waiting}</td>'
                     '</tr>'
-                    ) 
+                    )
 
     if rows:
         return render_template("rooms.html",
