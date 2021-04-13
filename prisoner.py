@@ -81,7 +81,7 @@ def action(player_action, player_id, room_id, session_idx):
         content = ""
     else:
         wait = False
-        opponent = row["player1"] if row["player1"] != player_id else row["player2"]
+        opponent = row["player2"] if row["player1"] == player_id else row["player1"]
         opponent_action = results[session_idx][opponent]
         gain = payoff(player_action, opponent_action)
         content = (f'You chose to {actions_list[player_action]} and the other partecipant chose to {actions_list[opponent_action]}.<br>'
@@ -125,24 +125,17 @@ def room(player_id, room_id):
     if player_id in results[session_idx]:
         return redirect(f"{suffix}/action/{results[session_idx][player_id]}/{player_id}/{room_id}/{session_idx}")
     else:
-        opponent = row["player1"] if row["player1"] != player_id else row["player2"]
+        opponent = row["player2"] if row["player1"] == player_id else row["player1"]
+        opponent_display = opponent.replace("_computer", "")
         if row["show_picture"]:
 
-
-            '''
-            picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
-                       f'<script src="{app.static_url_path}/hide_image.js"></script>')
-            '''
-
-            picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
-
-
-            '''
-            hide_image = f'<script>window.onload = function() {{ hide_image("imageID", {row["show_picture"] * 1000}); }}</script>'
-            '''
-
-            hide_image = ""
-
+            if row["show_picture"] > 0:
+                picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent_display}.jpg">\n'
+                           f'<script src="{app.static_url_path}/hide_image.js"></script>')
+                hide_image = f'<script>window.onload = function() {{ hide_image("imageID", {row["show_picture"] * 1000}); }}</script>'
+            else:  # show image forever
+                picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent_display}.jpg">\n'
+                hide_image = ""
         else:
             picture = ""
             hide_image = ""
@@ -151,7 +144,7 @@ def room(player_id, room_id):
                            room_id=room_id,
                            session_idx=session_idx,
                            player_id=player_id,
-                           opponent=opponent,
+                           opponent=opponent_display,
                            hide_image=Markup(hide_image),
                            picture=Markup(picture),
                            suffix=suffix

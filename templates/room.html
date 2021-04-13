@@ -21,7 +21,9 @@
 
 <h3>You are playing with {{ opponent }} (session: {{ session_idx }})</h3>
 
-
+<p>
+{{ picture }}
+</p>
 
 <p>
 <a  class="btn btn-primary" href="{{ suffix }}/action/C/{{ player_id }}/{{ room_id }}/{{ session_idx }}">I will cooperate</a>
@@ -32,9 +34,7 @@
 <a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >return to the rooms list</a>
 </p>
 
-<p>
-{{ picture }}
-</p>
+
 
 </div>
 
