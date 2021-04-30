@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% include 'bootstrap_css.html' %}
+
+<title>Prisoner's Dilemma</title>
+</head>
+
+<script>
+
+    window.onload = function () { // when page loads
+
+     // To test when submitting:
+
+     document.getElementById('relation').onsubmit=function() {
+
+       if ((!document.getElementById('yes').checked) && (!document.getElementById('no').checked))
+         {
+         alert("You must answer the questions before playing!");
+         return false; //  cancel submit
+       }
+
+       if ((!document.getElementById('unknown').checked) && (!document.getElementById('known').checked) && (!document.getElementById('friend').checked))
+         {
+         alert("You must answer the questions before playing!");
+         return false; //  cancel submit
+       }
+
+
+    }
+    }
+
+</script>
+
+
+<body>
+<div class="container">
+
+<h1>Prisoner's Dilemma</h1>
+<hr>
+<h3>You will play against:</h3>
+
+{{ picture }}<br>
+
+<form id="relation" action="{{ suffix }}/relation/{{ player1 }}/{{ player2 }}" method="post">
+
+<h3 style="margin-top:1cm;">Do you PERSONALLY know this person?</h3>
+
+<input type="radio" id="yes" name="known_personally" value="y">
+<label for="yes">Yes</label><br>
+<input type="radio" id="no" name="known_personally" value="n">
+<label for="no">No</label><br>
+
+<h3 style="margin-top:1cm;">What is the relationship you have with this person?</h3>
+
+ <input type="radio" id="unknown" name="relation" value="unknown">
+<label for="unknown">Unknown</label><br>
+<input type="radio" id="known" name="relation" value="known">
+<label for="known">Known</label><br>
+<input type="radio" id="friend" name="relation" value="friend">
+<label for="friend">Friend</label><br>
+
+<input style="margin-top:1cm;" type="submit" class="btn btn-primary" value="Submit">
+
+<input type="hidden" id="player_id" name="player_id" value="{{ player_id }}">
+<input type="hidden" id="room_id" name="room_id" value="{{ room_id }}">
+
+</form>
+
+
+
+
+
+
+</body>
+</html>

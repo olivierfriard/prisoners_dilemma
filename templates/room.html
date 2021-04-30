@@ -13,16 +13,17 @@
 <div class="container">
 
 <h1>Prisoner's Dilemma</h1>
-
+<hr>
 <h2>Room #{{ room_id }}</h2>
 
 <h3>You are the player <b>{{ player_id }}</b></h3>
 
+<h3>You are playing against:</h3>
 
-<h3>You are playing with {{ opponent }} (session: {{ session_idx }})</h3>
+{{ picture }}<br>
 
 <p>
-{{ picture }}
+session: {{ session_idx }}
 </p>
 
 <p>

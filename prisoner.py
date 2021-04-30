@@ -27,6 +27,8 @@ suffix="/prisoner"
 from flask import Flask, render_template, Markup, redirect, request
 app = Flask(__name__, static_folder='static', static_url_path=f'{suffix}/static')
 
+DB_FILE_NAME = "prisoner_dilemma.db"
+
 app.debug = True
 
 import sqlite3
@@ -45,6 +47,12 @@ def payoff(current_player, other_player):
     return 0
 
 
+def connection():
+    sqlite_connection = sqlite3.connect(DB_FILE_NAME)
+    sqlite_connection.row_factory = sqlite3.Row
+    return sqlite_connection
+
+
 def results_dict(s):
     if s == "":
         return {}
@@ -58,8 +66,6 @@ def action(player_action, player_id, room_id, session_idx):
     if player_action not in actions_list:
         return f"action {player_action} not found"
 
-    connection = sqlite3.connect("prisoner_dilemma.db")
-    connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, results "
                     "FROM games WHERE room = ?"),
@@ -96,19 +102,49 @@ def action(player_action, player_id, room_id, session_idx):
                             )
 
 
+@app.route(f'{suffix}/relation/<player1>/<player2>', methods=("POST",))
+def relation(player1, player2):
+    """
+    record relation between player1 and player2
+    """
+    if request.method == "POST":
+        # ('known_personally', 'y'), ('relation', 'known')
+        connection = sqlite3.connect(DB_FILE_NAME)
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO relations (player1, player2, known_personally, relationship ) VALUES (?,?,?,?)",
+                       (player1, player2, request.form['known_personally'], request.form['relation']))
+        connection.commit()
+
+        return redirect(f"{suffix}/room/{request.form['player_id']}/{request.form['room_id']}")
+
+
 @app.route(f'{suffix}/room/<player_id>/<room_id>')
 def room(player_id, room_id):
     """
     let play a session of room room_id
     """
-
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, show_picture, results "
                     "FROM games WHERE room = ?"),
-                   (room_id, ))
+                    (room_id, ))
     row = cursor.fetchone()
+
+    # check if info about player are present in db
+    cursor.execute("SELECT * FROM relations WHERE player1 = ? AND player2 = ?", (row['player1'], row['player2'].replace("_computer", "")))
+    row_relation = cursor.fetchone()
+    if row_relation is None:
+        picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{row["player2"].replace("_computer", "")}.jpg">\n'
+        return render_template("relation.html",
+                        player1=row['player1'],
+                        player2=row['player2'].replace("_computer", ""),
+                        picture=Markup(picture),
+                        suffix=suffix,
+                        player_id=player_id,
+                        room_id=room_id
+                        )
 
     results = results_dict(row["results"])
 

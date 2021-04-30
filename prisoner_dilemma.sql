@@ -19,7 +19,8 @@ INSERT INTO players (id, name) VALUES
 ('FB','gruppo_3'),
 ('VL','gruppo_3');
 
-
+DROP TABLE IF EXISTS relations;
+CREATE TABLE relations (player1 text, player2 text, known_personally text, relationship text);
 
 
 DROP TABLE IF EXISTS games;
