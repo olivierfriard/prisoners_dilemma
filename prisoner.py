@@ -46,12 +46,12 @@ def payoff(current_player, other_player):
         return 2
     return 0
 
-
+'''
 def connection():
     sqlite_connection = sqlite3.connect(DB_FILE_NAME)
     sqlite_connection.row_factory = sqlite3.Row
     return sqlite_connection
-
+'''
 
 def results_dict(s):
     if s == "":
@@ -106,9 +106,10 @@ def action(player_action, player_id, room_id, session_idx):
 def relation(player1, player2):
     """
     record relation between player1 and player2
+    if not already present in DB
     """
+
     if request.method == "POST":
-        # ('known_personally', 'y'), ('relation', 'known')
         connection = sqlite3.connect(DB_FILE_NAME)
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
@@ -191,8 +192,10 @@ def room(player_id, room_id):
 def rooms(player_id):
     """
     list all the rooms for the player player_id
+
+    in this version
     """
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, results "
@@ -231,10 +234,14 @@ def rooms(player_id):
 
 @app.route(f'{suffix}/player_id', methods=("POST", "GET"))
 def func_player_id():
+    """
+    login with player ID
+    """
+
     if request.method == "POST":
         player_id = request.form["player_id"]
 
-        connection = sqlite3.connect("prisoner_dilemma.db")
+        connection = sqlite3.connect(DB_FILE_NAME)
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
         cursor.execute("SELECT id, name FROM players WHERE id = ?",
@@ -245,11 +252,6 @@ def func_player_id():
 
     return redirect(f"{suffix}/rooms/{player_id}")
 
-    '''
-    return render_template("player.html",
-                           player_id=player_id
-                         )
-    '''
 
 
 @app.route(f'{suffix}/admin')
@@ -258,14 +260,14 @@ def admin():
     administration page
     """
 
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     rows = cursor.execute("SELECT id, name FROM players").fetchall()
 
-    content = '<table class="table"><thead><tr><th>Players</th><th>Pictures</th><th>URL FOR rooms list</th></tr><thead>'
+    content = '<table class="table"><thead><tr><th>Players</th><th>Pictures</th><th>Player id</th></tr><thead>\n'
     for row in rows:
-        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="{app.static_url_path}/pictures/{row["id"]}.jpg"></td><td>{row["id"]}</td></tr>'
+        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="{app.static_url_path}/pictures/{row["id"]}.jpg"></td><td>{row["id"]}</td></tr>\n'
 
     return render_template("admin.html",
                            content = Markup(content),
@@ -278,7 +280,7 @@ def monitor():
     monitor all games/sessions
     """
 
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     rows = cursor.execute("SELECT room, player1, player2, session_number, show_picture, results FROM games").fetchall()
@@ -296,19 +298,23 @@ def monitor():
                 payoff_p1 += payoff(results[x][row["player1"]], results[x][row["player2"]])
                 payoff_p2 += payoff(results[x][row["player2"]], results[x][row["player1"]])
 
+        content += '<div class="card"><div class="card-body"><h5 class="card-title">'
         content += (f"Room #{row['room']} "
                     f"Number of sessions: {row['session_number']}  (played: {n_played}) "
                     f"Show picture of player: {row['show_picture']} s"
                    )
+        content += '</h5>'
 
         content += '<table class="table">'
-        content += '<thead><tr><th>Players</th><th>Points</th><th colspan="25">Sessions</th></tr></thead>'
+        content += '<thead><tr><th>Players</th><th>Points</th><th colspan="25">Sessions</th></tr></thead>\n'
 
 
         content += f'<tr><td>{row["player1"]}</td><td>{payoff_p1}</td><td>' + ("</td><td>".join([results[x][row['player1']] for x in results if row['player1'] in results[x]])) + "</td></tr>"
         content += f'<tr><td>{row["player2"]}</td><td>{payoff_p2}</td><td>' + ("</td><td>".join([results[x][row['player2']] for x in results if row['player2'] in results[x]])) + "</td></tr>"
 
         content += '</table>'
+
+        content += '</div></div>'
 
     return render_template("monitor.html",
                            content = Markup(content),

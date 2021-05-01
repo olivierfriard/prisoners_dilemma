@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta author="Olivier Friard">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,22 +16,23 @@
     <div class="container">
 
         <h1>Welcome to the Prisoner's Dilemma game</h1>
+        <hr>
 
 <form action="/prisoner/player_id" method="POST">
-    <div class="form-group">
-        <label for="player_id">Input your player id</label>
-    
-    <input type="text" class="form-control" id="player_id" name="player_id">
+
+<div class="form-group">
+<label for="player_id"><h3>Input your player id</h3></label>
+<input type="text" class="form-control" id="player_id" name="player_id">
 </div>
 
 <button type="submit" class="btn btn-primary">Submit</button>
-</form>
 
+</form>
 
 </div>
 </main>
 
 {% include 'bootstrap_js.html' %}
 
-  </body>
+</body>
 </html>
