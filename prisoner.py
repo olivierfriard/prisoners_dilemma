@@ -27,7 +27,7 @@ suffix="/prisoner"
 from flask import Flask, render_template, Markup, redirect, request
 app = Flask(__name__, static_folder='static', static_url_path=f'{suffix}/static')
 
-DB_FILE_NAME = "prisoner_dilemma.db"
+from config import DB_FILE_NAME
 
 app.debug = True
 
