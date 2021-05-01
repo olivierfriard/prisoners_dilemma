@@ -33,7 +33,7 @@ app.debug = True
 
 import sqlite3
 
-actions_list = {"C": "cooperate", "D": "defect"}
+actions_list = {"C": "collaborare", "D": "NON collaborare"}
 
 def payoff(current_player, other_player):
     if current_player == "C" and other_player == "C":
@@ -66,6 +66,8 @@ def action(player_action, player_id, room_id, session_idx):
     if player_action not in actions_list:
         return f"action {player_action} not found"
 
+    connection = sqlite3.connect(DB_FILE_NAME)
+    connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, results "
                     "FROM games WHERE room = ?"),
@@ -73,6 +75,10 @@ def action(player_action, player_id, room_id, session_idx):
     row = cursor.fetchone()
 
     results = results_dict(row["results"])
+
+    # check number of played sessions
+    played_session_nb = len([x for x in results if len(results[x]) == 2])
+    flag_end =  played_session_nb == row['session_number']
 
     if session_idx not in results:
         results[session_idx] = {}
@@ -90,14 +96,15 @@ def action(player_action, player_id, room_id, session_idx):
         opponent = row["player2"] if row["player1"] == player_id else row["player1"]
         opponent_action = results[session_idx][opponent]
         gain = payoff(player_action, opponent_action)
-        content = (f'You chose to {actions_list[player_action]} and the other partecipant chose to {actions_list[opponent_action]}.<br>'
-                    f"As a result, you earned {gain} points. "
+        content = (f'Hai scelto di <b>{actions_list[player_action]}</b> e l\'altro partecipante ha scelto di <b>{actions_list[opponent_action]}</b>.<br>'
+                    f"Come risultato, hai guadagnato {gain} CFU. "
                     )
     return render_template("results.html",
                             wait=wait,
                             player_id=player_id,
                             room_id=room_id,
                             content=Markup(content),
+                            flag_end = flag_end,
                             suffix=suffix
                             )
 
@@ -199,23 +206,38 @@ def rooms(player_id):
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, results "
-                    "FROM games WHERE player1 = ? OR player2 = ?"),
-                   (player_id, player_id,))
+                    "FROM games WHERE player1 = ? OR player2 = ? "
+                    #"ORDER BY room"
+                    "ORDER BY player2, room"
+                    ),
+                   (player_id, player_id))
     rows = cursor.fetchall()
 
     content = ""
+
+    room_list = []
+    opponent_list = []
     for row in rows:
         results = results_dict(row["results"])
         # check number of played sessions
         played = len([x for x in results if len(results[x]) == 2])
-        # check if opponent is waiting
-        opponent_is_waiting = "Yes" if len([x for x in results if len(results[x]) == 1 and player_id not in results[x]]) else "No"
+        if played == row["session_number"]:
+            continue
 
+        # check if opponent is waiting
+        #opponent_is_waiting = "Yes" if len([x for x in results if len(results[x]) == 1 and player_id not in results[x]]) else "No"
 
         to_be_played = row["session_number"] - played
-        content += (f'<tr><td><a href="{suffix}/room/{player_id}/{row["room"]}">room #{row["room"]}</a></td>'
-                    f'<td>{row["session_number"]}</td><td>{played}</td><td>{to_be_played}</td>'
-                    f'<td>{opponent_is_waiting}</td>'
+        if row['player2'] not in opponent_list:
+            room_list.append(row['room'])
+            opponent_list.append(row['player2'])
+
+            content += (f'<tr><td><a href="{suffix}/room/{player_id}/{row["room"]}">stanza #{row["room"]}</a></td>'
+            f'<td class="text-center">{row["player2"].replace("_computer", "")}</td>'
+                    f'<td class="text-center">{row["session_number"]}</td>'
+                    f'<td class="text-center" >{played}</td>'
+                    f'<td class="text-center">{to_be_played}</td>'
+                    # f'<td>{opponent_is_waiting}</td>'
                     '</tr>'
                     )
 
@@ -298,19 +320,19 @@ def monitor():
                 payoff_p1 += payoff(results[x][row["player1"]], results[x][row["player2"]])
                 payoff_p2 += payoff(results[x][row["player2"]], results[x][row["player1"]])
 
-        content += '<div class="card"><div class="card-body"><h5 class="card-title">'
+        content += '<div class="card"><div class="card-body"><b>'
         content += (f"Room #{row['room']} "
                     f"Number of sessions: {row['session_number']}  (played: {n_played}) "
-                    f"Show picture of player: {row['show_picture']} s"
+                    #f"Show picture of player: {row['show_picture']} s"
                    )
-        content += '</h5>'
+        content += '</b>'
 
         content += '<table class="table">'
         content += '<thead><tr><th>Players</th><th>Points</th><th colspan="25">Sessions</th></tr></thead>\n'
 
 
-        content += f'<tr><td>{row["player1"]}</td><td>{payoff_p1}</td><td>' + ("</td><td>".join([results[x][row['player1']] for x in results if row['player1'] in results[x]])) + "</td></tr>"
-        content += f'<tr><td>{row["player2"]}</td><td>{payoff_p2}</td><td>' + ("</td><td>".join([results[x][row['player2']] for x in results if row['player2'] in results[x]])) + "</td></tr>"
+        content += f'<tr><td>{row["player1"]}</td><td>{payoff_p1}</td><td>' + (" ".join([results[x][row['player1']] for x in results if row['player1'] in results[x]])) + "</td></tr>"
+        content += f'<tr><td>{row["player2"]}</td><td>{payoff_p2}</td><td>' + (" ".join([results[x][row['player2']] for x in results if row['player2'] in results[x]])) + "</td></tr>"
 
         content += '</table>'
 
@@ -319,6 +341,7 @@ def monitor():
     return render_template("monitor.html",
                            content = Markup(content),
                            suffix=suffix)
+
 
 @app.route(suffix + '/')
 @app.route(suffix)

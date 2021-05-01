@@ -1,9 +1,11 @@
 """
-playing bot
+playing bot for the prisoner dilemma
 """
 
-MIN_WAIT = 5
-MAX_WAIT = 23
+DB_FILE_NAME = "prisoner_dilemma.db"
+
+MIN_WAIT = 5  # seconds
+MAX_WAIT = 23 # seconds
 
 import computer_strategy
 
@@ -17,7 +19,7 @@ def results_dict(s):
     else:
         return eval(s)
 
-connection = sqlite3.connect("prisoner_dilemma.db")
+connection = sqlite3.connect(DB_FILE_NAME)
 connection.row_factory = sqlite3.Row
 cursor = connection.cursor()
 
@@ -27,17 +29,18 @@ while True:
 
     rows = cursor.fetchall()
     for row in rows:
-        print(row["room"], row["player1"], row["results"])
-        print(row["results"])
         results = results_dict(row["results"])
-        print(results)
         for session in results:
+            # check if player has played
             if len(results[session]) == 1:
-                print(computer_strategy.strategy[row["room"]])
-                print(session, computer_strategy.strategy[row["room"]]["strategy"][int(session)])
-                results[session][row["player2"]] = computer_strategy.strategy[row["room"]]["strategy"][int(session)]
+                print(f' room: {row["room"]}  player1: {row["player1"]}  results: {row["results"]}')
+                computer_choice = computer_strategy.strategy[row["room"]]["strategy"][int(session) - 1]
+                print(f"session: {session}   computer strategy: {computer_choice}")
+                results[session][row["player2"]] = computer_choice
 
                 cursor.execute("UPDATE games SET results = ? WHERE room = ?", (str(results), row["room"]))
                 connection.commit()
 
-    time.sleep(random.randrange(MIN_WAIT, MAX_WAIT))
+    waiting_time = random.randrange(MIN_WAIT, MAX_WAIT)
+    print(f"waiting {waiting_time} seconds")
+    time.sleep(waiting_time)

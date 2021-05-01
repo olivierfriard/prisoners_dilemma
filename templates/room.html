@@ -13,27 +13,27 @@
 <body>
 <div class="container">
 
-<h1>Prisoner's Dilemma</h1>
+    <h1>Gioco del dilemma del prigioniero</h1>
 <hr>
-<h2>Room #{{ room_id }}</h2>
+<h2>Stanza #{{ room_id }}</h2>
 
-<h3>You are the player <b>{{ player_id }}</b></h3>
+<h3>Sei il giocatore <b>{{ player_id }}</b></h3>
 
-<h3>You are playing against:</h3>
+<h3>Stai giocando contro:</h3>
 
 {{ picture }}<br>
 
 <p>
-session: {{ session_idx }}
+sessione: {{ session_idx }}
 </p>
 
 <p>
-<a  class="btn btn-primary" href="{{ suffix }}/action/C/{{ player_id }}/{{ room_id }}/{{ session_idx }}">I will cooperate</a>
-<a  class="btn btn-primary" href="{{ suffix }}/action/D/{{ player_id }}/{{ room_id }}/{{ session_idx }}">I will defect</a>
+<a  class="btn btn-primary" href="{{ suffix }}/action/C/{{ player_id }}/{{ room_id }}/{{ session_idx }}">Collabori</a>
+<a  class="btn btn-primary" href="{{ suffix }}/action/D/{{ player_id }}/{{ room_id }}/{{ session_idx }}">Non collabori</a>
 </p>
 
 <p>
-<a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >return to the rooms list</a>
+<a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >Torna all'elenco delle stanze</a>
 </p>
 
 

@@ -15,20 +15,20 @@
   <body>
       <div class="container">
 
-        <h1>Prisoner's Dilemma</h1>
+        <h1>Gioco del dilemma del prigioniero</h1>
         <hr>
+    <h2>Stanza #{{ room_id }}</h2>
 
-    <h2>Room #{{ room_id }}</h2>
-    <h3>player {{ player_id }}</h3>
+    <h3>Sei il giocatore <b>{{ player_id }}</b></h3>
 
-
+{% if not wait %}
   <p>
-  <a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >return to the rooms list</a>
+  <a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >Torna all'elenco delle stanze</a>
   </p>
-      
+  {% endif %}
 
 {% if wait %}
-<h3>Please wait for the other partecipant</h3>
+<h3>Aspetta l'altro partecipante</h3>
 
 
 <img src="{{ url_for('static', filename='wait.gif') }}">
@@ -38,12 +38,15 @@
 {% endif %}
 
 <p></p>
-{% if not wait %}
+{% if not wait and not flag_end %}
 <p>
-<a href="{{ suffix }}/room/{{ player_id }}/{{ room_id }}" class="btn btn-primary" >Continue to play</a>
+<a href="{{ suffix }}/room/{{ player_id }}/{{ room_id }}" class="btn btn-primary" >Continua a giocare</a>
 </p>
 {% endif %}
 
+{% if flag_end %}
+<p>Tutte le sessioni sono state giocate</p>
+{% endif %}
 
 </div>
 
