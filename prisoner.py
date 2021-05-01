@@ -263,17 +263,18 @@ def func_player_id():
     if request.method == "POST":
         player_id = request.form["player_id"]
 
-        connection = sqlite3.connect(DB_FILE_NAME)
+        connection = sqlite3.connect(DB_FILE_NAME) 
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
         cursor.execute("SELECT id, name FROM players WHERE id = ?",
                        (player_id, ))
         row = cursor.fetchone()
         if not row:
+            return render_template("home.html",
+                                   msg=Markup("<h4>L'id del giocatore non è stato trovato!<br>Riprova rispettando le maiuscole/minuscole.</h4>"))
             return f"Player {player_id} not found"
 
     return redirect(f"{suffix}/rooms/{player_id}")
-
 
 
 @app.route(f'{suffix}/admin')
