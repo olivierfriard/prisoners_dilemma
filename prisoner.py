@@ -269,7 +269,8 @@ def func_player_id():
         cursor.execute("SELECT id, name FROM players WHERE id = ?",
                        (player_id, ))
         row = cursor.fetchone()
-        if not row:
+        if row is None:
+            return str(row)
             return render_template("home.html",
                                    msg=Markup("<h4>L'id del giocatore non è stato trovato!<br>Riprova rispettando le maiuscole/minuscole.</h4>"))
             return f"Player {player_id} not found"
