@@ -313,3 +313,4 @@ INSERT INTO games (room, player1, player2, session_number, show_picture) VALUES
 (268, 'VL', 'CP_computer', 10, -1),
 (269, 'VL', 'FR_computer', 10, -1),
 (270, 'VL', 'CE_computer', 10, -1);
+
