@@ -46,12 +46,6 @@ def payoff(current_player, other_player):
         return 2
     return 0
 
-'''
-def connection():
-    sqlite_connection = sqlite3.connect(DB_FILE_NAME)
-    sqlite_connection.row_factory = sqlite3.Row
-    return sqlite_connection
-'''
 
 def results_dict(s):
     if s == "":
