@@ -304,6 +304,61 @@ def monitor():
     rows = cursor.execute("SELECT room, player1, player2, session_number, show_picture, results FROM games").fetchall()
 
     content = f""
+
+    content += '<table class="table">'
+    content += ('<thead><tr><th class="text-left">Room</th><th class="text-left">number of sessions</th><th class="text-left">played</th>'
+                '<th class="text-left">player 1</th><th class="text-left">points player 1</th>'
+                '<th class="text-left">player 2</th><th class="text-left">points player 2</th>'
+                '<th>Details</th>'
+                '</tr></thead>\n'
+               )
+    for row in rows:
+
+        results = results_dict(row['results'])
+        n_played = sum([1 for x in results if len(results[x]) == 2])
+        # pay off
+        payoff_p1 = 0
+        payoff_p2 = 0
+        for x in results:
+            if len(results[x]) == 2:
+                payoff_p1 += payoff(results[x][row["player1"]], results[x][row["player2"]])
+                payoff_p2 += payoff(results[x][row["player2"]], results[x][row["player1"]])
+
+
+        content += f'<tr><td class="text-left">{row["room"]}</td>'
+        content += f'<td class="text-left">{row["session_number"]}</td>'
+        content += f'<td class="text-left">{n_played}</td>'
+
+
+        content += f'<td class="text-left">{row["player1"]}</td><td class="text-left">{payoff_p1}</td>'
+        content += f'<td class="text-left">{row["player2"]}</td><td class="text-left">{payoff_p2}</td>'
+
+        content += '<td>' + (" ".join([results[x][row['player1']] for x in results if row['player1'] in results[x]])) + '<br>'
+        content += (" ".join([results[x][row['player2']] for x in results if row['player2'] in results[x]])) + "</td>"
+        content += "</tr>"
+
+
+    content += '</table>'
+
+
+
+    return render_template("monitor.html",
+                           content = Markup(content),
+                           suffix=suffix)
+
+
+@app.route(f'{suffix}/monitor2')
+def monitor2():
+    """
+    monitor all games/sessions
+    """
+
+    connection = sqlite3.connect(DB_FILE_NAME)
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    rows = cursor.execute("SELECT room, player1, player2, session_number, show_picture, results FROM games").fetchall()
+
+    content = f""
     for row in rows:
 
         results = results_dict(row['results'])
