@@ -292,8 +292,8 @@ def admin():
                            suffix=suffix)
 
 
-@app.route(f'{suffix}/monitor')
-def monitor():
+@app.route(f'{suffix}/monitor_compact')
+def monitor_compact():
     """
     monitor all games/sessions
     """
@@ -347,8 +347,8 @@ def monitor():
                            suffix=suffix)
 
 
-@app.route(f'{suffix}/monitor2')
-def monitor2():
+@app.route(f'{suffix}/monitor')
+def monitor():
     """
     monitor all games/sessions
     """
