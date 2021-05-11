@@ -1,5 +1,8 @@
 """
 computer strategy by room_id
+
+v. 2021-05-11
+
 """
 
 strategy = {
