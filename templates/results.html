@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta author="Olivier Friard">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,15 +11,18 @@
     {% include 'bootstrap_css.html' %}
 
     <title>Prisoner's Dilemma</title>
-  </head>
-  <body>
-      <div class="container">
+</head>
 
-        <h1>Gioco del dilemma del prigioniero</h1>
-        <hr>
-    <h2>Stanza #{{ room_id }}</h2>
+<body>
 
-    <h3>Sei il giocatore <b>{{ player_id }}</b></h3>
+<div class="container">
+
+<h1>Gioco del dilemma del prigioniero</h1>
+<hr>
+
+<h2>Stanza #{{ room_id }}</h2>
+
+<h3>Sei il giocatore <b>{{ player_id }}</b></h3>
 
 
 {% if not wait %}

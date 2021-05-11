@@ -85,24 +85,28 @@ INSERT INTO games (room, player1, player2, session_number, show_picture) VALUES
 (40, 'CDM', 'CP_computer', 10, -1),
 (41, 'CDM', 'FR_computer', 10, -1),
 (42, 'CDM', 'FV_computer', 10, -1),
+
 (43, 'CDM', 'ALMG_computer', 10, -1),
 (44, 'CDM', 'PSCH_computer', 10, -1),
 (45, 'CDM', 'FBS_computer', 10, -1),
 (46, 'CDM', 'CP_computer', 10, -1),
 (47, 'CDM', 'FR_computer', 10, -1),
 (48, 'CDM', 'FV_computer', 10, -1),
+
 (49, 'CDM', 'ALMG_computer', 10, -1),
 (50, 'CDM', 'PSCH_computer', 10, -1),
 (51, 'CDM', 'FBS_computer', 10, -1),
 (52, 'CDM', 'CP_computer', 10, -1),
 (53, 'CDM', 'FR_computer', 10, -1),
 (54, 'CDM', 'FV_computer', 10, -1),
+
 (55, 'J', 'ALMG_computer', 10, -1),
 (56, 'J', 'PSCH_computer', 10, -1),
 (57, 'J', 'FBS_computer', 10, -1),
 (58, 'J', 'CP_computer', 10, -1),
 (59, 'J', 'FR_computer', 10, -1),
 (60, 'J', 'FV_computer', 10, -1),
+
 (61, 'J', 'ALMG_computer', 10, -1),
 (62, 'J', 'PSCH_computer', 10, -1),
 (63, 'J', 'FBS_computer', 10, -1),
