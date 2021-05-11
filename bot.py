@@ -4,8 +4,8 @@ playing bot for the prisoner dilemma
 
 DB_FILE_NAME = "prisoner_dilemma.db"
 
-MIN_WAIT = 5  # seconds
-MAX_WAIT = 23 # seconds
+MIN_WAIT = 1  # seconds
+MAX_WAIT = 7 # seconds
 
 import computer_strategy
 

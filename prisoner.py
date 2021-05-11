@@ -32,6 +32,7 @@ from config import DB_FILE_NAME
 app.debug = True
 
 import sqlite3
+import random
 
 actions_list = {"C": "collaborare", "D": "NON collaborare"}
 
@@ -70,10 +71,6 @@ def action(player_action, player_id, room_id, session_idx):
 
     results = results_dict(row["results"])
 
-    # check number of played sessions
-    played_session_nb = len([x for x in results if len(results[x]) == 2])
-    flag_end =  played_session_nb == row['session_number']
-
     if session_idx not in results:
         results[session_idx] = {}
 
@@ -82,23 +79,72 @@ def action(player_action, player_id, room_id, session_idx):
                    (str(results), room_id))
     connection.commit()
 
+    opponent = row["player2"] if row["player1"] == player_id else row["player1"]
+
     if len(results[session_idx]) < 2:
         wait = True
         content = ""
     else:
         wait = False
-        opponent = row["player2"] if row["player1"] == player_id else row["player1"]
+        '''
+        # disabled for blind play
         opponent_action = results[session_idx][opponent]
         gain = payoff(player_action, opponent_action)
         content = (f'Hai scelto di <b>{actions_list[player_action]}</b> e l\'altro partecipante ha scelto di <b>{actions_list[opponent_action]}</b>.<br>'
                     f"Come risultato, hai guadagnato {gain} CFU. "
                     )
+        '''
+        content = ""
+
+    # check number of played sessions
+    played_session_nb = len([x for x in results if len(results[x]) == 2])
+    flag_end =  (played_session_nb == row['session_number'])
+    # check opponent strategy if rooom is totally played
+    end_msg = ""
+    if flag_end:
+        results_str = ""
+        for result in results:
+            for player in results[result]:
+                if player == player_id:
+                    continue
+                results_str += results[result][player]
+        if results_str.count("C") > results_str.count("D"):
+            end_msg = "In questa stanza, il tuo opponente ha perlopiù <b>COLLABORATO</b>."
+        elif results_str.count("C") < results_str.count("D"):
+            end_msg = "In questa stanza, il tuo opponente ha perlopiù <b>NON COLLABORATO</b>."
+        else:
+            end_msg = "In questa stanza, il tuo opponente ha <b>COLLABORATO</b> e <b>NON COLLABORATO</b> lo stesso numero di volte."
+
+        # check if rooms are finished for this opponent
+        cursor.execute(("SELECT results, session_number FROM games WHERE player1 = ? AND player2 = ? "),
+                        (player_id, opponent))
+
+        rows = cursor.fetchall()
+        tot_sessions = 0
+        tot_gain = 0
+        for row in rows:
+            results = results_dict(row["results"])
+            for x in results:
+                print(results[x])
+                try:
+                    tot_gain += payoff(results[x][player_id], results[x][opponent])
+                except:
+                    pass
+            tot_sessions += len(results)
+
+        if tot_sessions == row['session_number'] * 3:
+            end_msg += f"<br><br><b>Come risultato finale, hai guadagnato {tot_gain} CFU.</b><br><br>Grazie per la partecipazione!<br>"
+
+        print(f"{tot_sessions=}")
+        print(f"{tot_gain=}")
+
     return render_template("results.html",
                             wait=wait,
                             player_id=player_id,
                             room_id=room_id,
                             content=Markup(content),
                             flag_end = flag_end,
+                            end_msg = Markup(end_msg),
                             suffix=suffix
                             )
 
@@ -201,39 +247,55 @@ def rooms(player_id):
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, results "
                     "FROM games WHERE player1 = ? OR player2 = ? "
-                    #"ORDER BY room"
-                    "ORDER BY player2, room"
+                    "ORDER BY room "
                     ),
                    (player_id, player_id))
-    rows = cursor.fetchall()
+
+    rows_sqlite = cursor.fetchall()
+    rows = [dict(row) for row in rows_sqlite]
+
+    opponents_list = sorted(list({row["player2"] for row in rows}))
+    
+    #seed = hash("|".join(opponents_list + [player_id]))  # add player id to personalize the sort order
+    seed = sum([ord(c)*(i+1) for c, i in zip(player_id, range(len(player_id)))])
+    random.seed(seed)
+    opponents_list_random = random.sample(opponents_list, len(opponents_list))
 
     content = ""
-
     room_list = []
     opponent_list = []
-    for row in rows:
-        results = results_dict(row["results"])
-        # check number of played sessions
-        played = len([x for x in results if len(results[x]) == 2])
-        if played == row["session_number"]:
-            continue
+    for opponent in opponents_list_random:
+        for row in rows:
+            if row['player2'] != opponent:
+                continue
+            results = results_dict(row["results"])
+            # check number of played sessions
+            played = len([x for x in results if len(results[x]) == 2])
+            if played == row["session_number"]:
+                continue
 
-        # check if opponent is waiting
-        #opponent_is_waiting = "Yes" if len([x for x in results if len(results[x]) == 1 and player_id not in results[x]]) else "No"
+            '''
+            # check if opponent is waiting
+            opponent_is_waiting = "Yes" if len([x for x in results if len(results[x]) == 1 and player_id not in results[x]]) else "No"
+            '''
 
-        to_be_played = row["session_number"] - played
-        if row['player2'] not in opponent_list:
-            room_list.append(row['room'])
-            opponent_list.append(row['player2'])
+            to_be_played = row["session_number"] - played
+            if row['player2'] not in opponent_list:
+                room_list.append(row['room'])
+                opponent_list.append(row['player2'])
 
-            content += (f'<tr><td><a href="{suffix}/room/{player_id}/{row["room"]}">stanza #{row["room"]}</a></td>'
-            f'<td class="text-center">{row["player2"].replace("_computer", "")}</td>'
-                    f'<td class="text-center">{row["session_number"]}</td>'
-                    f'<td class="text-center" >{played}</td>'
-                    f'<td class="text-center">{to_be_played}</td>'
-                    # f'<td>{opponent_is_waiting}</td>'
-                    '</tr>'
-                    )
+                content += (f'<tr><td><a href="{suffix}/room/{player_id}/{row["room"]}">stanza #{row["room"]}</a></td>'
+                f'<td class="text-center">{row["player2"].replace("_computer", "")}</td>'
+                        f'<td class="text-center">{row["session_number"]}</td>'
+                        f'<td class="text-center" >{played}</td>'
+                        f'<td class="text-center">{to_be_played}</td>'
+                        # f'<td>{opponent_is_waiting}</td>'
+                        '</tr>'
+                        )
+                break
+
+        if content:
+            break
 
     if rows:
         return render_template("rooms.html",
@@ -264,10 +326,8 @@ def func_player_id():
                        (player_id, ))
         row = cursor.fetchone()
         if row is None:
-            return str(row)
             return render_template("home.html",
                                    msg=Markup("<h4>L'id del giocatore non è stato trovato!<br>Riprova rispettando le maiuscole/minuscole.</h4>"))
-            return f"Player {player_id} not found"
 
     return redirect(f"{suffix}/rooms/{player_id}")
 
@@ -324,11 +384,9 @@ def monitor_compact():
                 payoff_p1 += payoff(results[x][row["player1"]], results[x][row["player2"]])
                 payoff_p2 += payoff(results[x][row["player2"]], results[x][row["player1"]])
 
-
         content += f'<tr><td class="text-left">{row["room"]}</td>'
         content += f'<td class="text-left">{row["session_number"]}</td>'
         content += f'<td class="text-left">{n_played}</td>'
-
 
         content += f'<td class="text-left">{row["player1"]}</td><td class="text-left">{payoff_p1}</td>'
         content += f'<td class="text-left">{row["player2"]}</td><td class="text-left">{payoff_p2}</td>'

@@ -21,11 +21,14 @@
 
     <h3>Sei il giocatore <b>{{ player_id }}</b></h3>
 
+
 {% if not wait %}
-  <p>
-  <a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >Torna all'elenco delle stanze</a>
-  </p>
-  {% endif %}
+<!--
+<p>
+<a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >Torna all'elenco delle stanze</a>
+</p>
+-->
+{% endif %}
 
 {% if wait %}
 <h3>Aspetta l'altro partecipante</h3>
@@ -45,8 +48,20 @@
 {% endif %}
 
 {% if flag_end %}
-<p><b>Tutte le sessioni di questa stanza sono state giocate.</b><br>
-Usa il pulsante sopra per ritornare all'elenco delle stanze</p>
+<p>
+Tutte le sessioni di questa stanza sono state giocate.
+</p>
+
+<p>
+{{  end_msg }}
+<p>
+Usa il pulsante sotto per ritornare all'elenco delle stanze</p>
+
+<p>
+<a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >Torna all'elenco delle stanze</a>
+</p>
+  
+
 {% endif %}
 
 </div>

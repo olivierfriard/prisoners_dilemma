@@ -7,13 +7,14 @@
 
     {% include 'bootstrap_css.html' %}
 
-    <title>Prisoner's Dilemma</title>
+<title>Prisoner's Dilemma</title>
+
 </head>
 
 <body>
 <div class="container">
 
-    <h1>Gioco del dilemma del prigioniero</h1>
+<h1>Gioco del dilemma del prigioniero</h1>
 <hr>
 <h2>Stanza #{{ room_id }}</h2>
 
@@ -32,10 +33,11 @@ sessione: {{ session_idx }}
 <a  class="btn btn-primary" href="{{ suffix }}/action/D/{{ player_id }}/{{ room_id }}/{{ session_idx }}">Non collabori</a>
 </p>
 
+<!--
 <p>
 <a href="{{ suffix }}/rooms/{{ player_id }}" class="btn btn-primary" >Torna all'elenco delle stanze</a>
 </p>
-
+-->
 
 
 </div>
