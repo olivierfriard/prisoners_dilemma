@@ -125,7 +125,6 @@ def action(player_action, player_id, room_id, session_idx):
         for row in rows:
             results = results_dict(row["results"])
             for x in results:
-                print(results[x])
                 try:
                     tot_gain += payoff(results[x][player_id], results[x][opponent])
                 except:
@@ -134,9 +133,6 @@ def action(player_action, player_id, room_id, session_idx):
 
         if tot_sessions == row['session_number'] * 3:
             end_msg += f"<br><br><b>Come risultato finale, hai guadagnato {tot_gain} CFU.</b><br><br>Grazie per la partecipazione!<br>"
-
-        print(f"{tot_sessions=}")
-        print(f"{tot_gain=}")
 
     return render_template("results.html",
                             wait=wait,
