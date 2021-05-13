@@ -4,7 +4,8 @@ playing bot for the prisoner dilemma
 
 __version__ = "2021-05-13"
 
-DB_FILE_NAME = "prisoner_dilemma.db"
+import sys
+DB_FILE_NAME =  sys.argv[1]  #"prisoner_dilemma.db"
 
 MIN_WAIT = 1  # seconds
 MAX_WAIT = 7 # seconds
@@ -36,7 +37,7 @@ while True:
             # check if player has played
             if len(results[session]) == 1:
                 print(f' room: {row["room"]}  player1: {row["player1"]}  results: {row["results"]}')
-                computer_choice = computer_strategy.strategy[row["room"]]["strategy"][int(session) - 1]
+                computer_choice = computer_strategy.strategy[str(row["room"])]["strategy"][int(session) - 1]
                 print(f"session: {session}   computer strategy: {computer_choice}")
                 results[session][row["player2"]] = computer_choice
 
