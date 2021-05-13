@@ -2,6 +2,8 @@
 playing bot for the prisoner dilemma
 """
 
+__version__ = "2021-05-13"
+
 DB_FILE_NAME = "prisoner_dilemma.db"
 
 MIN_WAIT = 1  # seconds
@@ -44,3 +46,4 @@ while True:
     waiting_time = random.randrange(MIN_WAIT, MAX_WAIT)
     print(f"waiting {waiting_time} seconds")
     time.sleep(waiting_time)
+
