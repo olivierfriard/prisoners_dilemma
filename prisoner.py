@@ -91,7 +91,7 @@ def action(player_action, player_id, room_id, session_idx):
         opponent_action = results[session_idx][opponent]
         gain = payoff(player_action, opponent_action)
         content = (f'Hai scelto di <b>{actions_list[player_action]}</b> e l\'altro partecipante ha scelto di <b>{actions_list[opponent_action]}</b>.<br>'
-                    f"Come risultato, hai guadagnato {gain} CFU. "
+                    f"Come risultato, hai guadagnato {gain} ore. "
                     )
         '''
         content = ""
@@ -132,7 +132,7 @@ def action(player_action, player_id, room_id, session_idx):
             tot_sessions += len(results)
 
         if tot_sessions == row['session_number'] * 3:
-            end_msg += f"<br><br><b>Come risultato finale, hai guadagnato {tot_gain} CFU.</b><br><br>Grazie per la partecipazione!<br>"
+            end_msg += f"<br><br><b>Come risultato finale, hai guadagnato {round(tot_gain / 25, 1)} CFU.</b><br><br>Grazie per la partecipazione!<br>"
 
     return render_template("results.html",
                             wait=wait,

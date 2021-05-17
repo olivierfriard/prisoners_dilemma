@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta author="Olivier Friard">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,13 +9,16 @@
     {% include 'bootstrap_css.html' %}
 
     <title>Home - Prisoner's Dilemma</title>
-  </head>
-  <body>
-<main>
-    <div class="container">
 
-        <h1>Gioco del dilemma del prigioniero</h1>
-        <hr>
+</head>
+
+<body>
+
+<main>
+<div class="container">
+
+<h1>Gioco del dilemma del prigioniero</h1>
+<hr>
 
 
 
@@ -28,13 +32,18 @@ Nel “Dilemma del Prigioniero” i due giocatori si trovano in stanze diverse e
 Per ogni gioco, ad ognuno di loro vengono date due scelte: collaborare o non collaborare con l’altro giocatore.<br>
 
 Queste due scelte portano a risultati diversi, sulla base della propria scelta E della scelta dell’altro giocatore.<br>
-
+<br>
 Tra poco giocherai al “Dilemma del Prigioniero” per ottenere Crediti Formativi Universitari (CFU).
 Il numero di CFU ottenuti da te e dall’altro giocatore dipende sia dal tuo gioco (scelta: collaborare o non collaborare)
  sia dal gioco dell’altro giocatore (scelta: collaborare o non collaborare).<br>
  
+ <!--
  Qui giocherai sulla base di questa tabella che mostra il numero di CFU che puoi ottenere:
- 
+ -->
+
+ Ogni CFU vale <b>25 ore</b>.
+ Qui giocherai sulla base di questa tabella che mostra il <b>numero di ore</b> che puoi ottenere per ottenere i CFU.
+
  
 <table class="table" border="1">
 
@@ -43,6 +52,7 @@ Il numero di CFU ottenuti da te e dall’altro giocatore dipende sia dal tuo gio
 <tr><td style="color:red">TU collabori</td><td class="text-center"><span style="color:red"><b>3</b></span>; 3</td class="text-center"><td class="text-center"><span style="color:red"><b>1</b></span>; 4</td></tr>
 
 <tr><td style="color:red">TU NON collabori</td><td class="text-center"><span style="color:red"><b>4</b></span>; 1</td><td class="text-center"><span style="color:red"><b>2</b></span>; 2</td></tr>
+
 
 </table>
     </p>
