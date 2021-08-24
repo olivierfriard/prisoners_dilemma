@@ -1,36 +1,83 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
+    <meta author="Olivier Friard">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <meta http-equiv="refresh" content="60">
 
     {% include 'bootstrap_css.html' %}
 
     <title>Home - Prisoner's Dilemma</title>
-  </head>
-  <body>
+
+</head>
+
+<body>
+
 <main>
-    <div class="container">
+<div class="container">
 
-        <h1>Welcome to the Prisoner's Dilemma game</h1>
+<h1>Prisoner's Dilemma game</h1>
+<hr>
 
-<form action="/prisoner/player_id" method="POST">
-    <div class="form-group">
-        <label for="player_id">Input your player id</label>
-    
-    <input type="text" class="form-control" id="player_id" name="player_id">
+
+
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">You will play the “Prisoner's Dilemma”, do you know this game?<br></h5>
+    <p class="card-text">
+In the "Prisoner's Dilemma" the two players are in different rooms and cannot communicate with each other.<br>
+
+For each game, each of them is given two choices: to collaborate or not to collaborate with the other player.<br>
+
+These two choices lead to different results, based on your choice AND the choice of the other player.<br>
+<br>
+Soon you will play the “Prisoner's Dilemma” to obtain University Training Credits (CFU). 
+The number of credits obtained by you and the other player depends on both your game (choice: collaborate or not collaborate) 
+        and the other player's game (choice: collaborate or not collaborate).<br>
+ 
+ <!--
+ Here you will play based on this table which shows the number of CFUs you can get:
+ -->
+
+ Each CFU is worth <b>25 hours</b>.
+ Here you will play based on this table which shows the <b>number of hours</b> that you can obtain to obtain CFUs.
+
+ 
+<table class="table" border="1">
+
+<tr><td></td><td class="text-center">the other cooperates</td><td class="text-center">the other does NOT cooperate</td></tr>
+
+<tr><td style="color:red">YOU cooperate</td><td class="text-center"><span style="color:red"><b>3</b></span>; 3</td class="text-center"><td class="text-center"><span style="color:red"><b>1</b></span>; 4</td></tr>
+
+<tr><td style="color:red">YOU DO NOT cooperate</td><td class="text-center"><span style="color:red"><b>4</b></span>; 1</td><td class="text-center"><span style="color:red"><b>2</b></span>; 2</td></tr>
+
+
+</table>
+    </p>
+  </div>
 </div>
 
-<button type="submit" class="btn btn-primary">Submit</button>
-</form>
+<br><br>
 
+{{ msg }}
+
+<form action="/prisoner/player_id" method="POST">
+
+<div class="form-group">
+<label for="player_id"><h2>Enter your ID and press the button to get started</h2></label>
+<input type="text" class="form-control" id="player_id" name="player_id">
+</div>
+
+<button type="submit" class="btn btn-primary">Play</button>
+
+</form>
 
 </div>
 </main>
 
 {% include 'bootstrap_js.html' %}
 
-  </body>
+</body>
 </html>

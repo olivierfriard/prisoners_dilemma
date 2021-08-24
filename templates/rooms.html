@@ -7,19 +7,27 @@
 
 {% include 'bootstrap_css.html' %}
 
-    <meta http-equiv="refresh" content="60">
 
     <title>List of rooms for {{ player_id }}- Prisoner's dilemma</title>
   </head>
   <body>
       <div class="container">
 
-        <h1>Prisoner's Dilemma</h1>
+        <h1>Gioco del dilemma del prigioniero</h1>
+        <hr>
 
-    <h2>List of rooms for player {{ player_id }}</h2>
+    <h2>Elenco delle stanze per il giocatore {{ player_id }}</h2>
 
 <table class="table">
-  <thead><tr><th>Room id</th><th>Number of sessions</th><th>Sessions played</th><th>Sessions to be played</th><th>Opponent is waiting</th></tr></thead>
+  <thead>
+    <tr>
+      <th>Numero stanza</th>
+    <th class="text-center">Opponente</th>
+      <th class="text-center">Numero di sessioni</th>
+      <th class="text-center">Numero di sessioni giocate</th>
+      <th>Numero di sessioni da giocare</th>
+      <!--<th>Opponent is waiting</th>-->
+    </tr></thead>
 {{ content }}
 </table>
 
