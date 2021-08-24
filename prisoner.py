@@ -27,11 +27,14 @@ suffix="/prisoner"
 from flask import Flask, render_template, Markup, redirect, request
 app = Flask(__name__, static_folder='static', static_url_path=f'{suffix}/static')
 
+from config import DB_FILE_NAME
+
 app.debug = True
 
 import sqlite3
+import random
 
-actions_list = {"C": "cooperate", "D": "defect"}
+actions_list = {"C": "collaborare", "D": "NON collaborare"}
 
 def payoff(current_player, other_player):
     if current_player == "C" and other_player == "C":
@@ -58,7 +61,7 @@ def action(player_action, player_id, room_id, session_idx):
     if player_action not in actions_list:
         return f"action {player_action} not found"
 
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, results "
@@ -76,24 +79,88 @@ def action(player_action, player_id, room_id, session_idx):
                    (str(results), room_id))
     connection.commit()
 
+    opponent = row["player2"] if row["player1"] == player_id else row["player1"]
+
     if len(results[session_idx]) < 2:
         wait = True
         content = ""
     else:
         wait = False
-        opponent = row["player1"] if row["player1"] != player_id else row["player2"]
+        '''
+        # disabled for blind play
         opponent_action = results[session_idx][opponent]
         gain = payoff(player_action, opponent_action)
-        content = (f'You chose to {actions_list[player_action]} and the other partecipant chose to {actions_list[opponent_action]}.<br>'
-                    f"As a result, you earned {gain} points. "
+        content = (f'Hai scelto di <b>{actions_list[player_action]}</b> e l\'altro partecipante ha scelto di <b>{actions_list[opponent_action]}</b>.<br>'
+                    f"Come risultato, hai guadagnato {gain} ore. "
                     )
+        '''
+        content = ""
+
+    # check number of played sessions
+    played_session_nb = len([x for x in results if len(results[x]) == 2])
+    flag_end =  (played_session_nb == row['session_number'])
+    # check opponent strategy if rooom is totally played
+    end_msg = ""
+    if flag_end:
+        results_str = ""
+        for result in results:
+            for player in results[result]:
+                if player == player_id:
+                    continue
+                results_str += results[result][player]
+        if results_str.count("C") > results_str.count("D"):
+            end_msg = "In questa stanza, il tuo opponente ha perlopiù <b>COLLABORATO</b>."
+        elif results_str.count("C") < results_str.count("D"):
+            end_msg = "In questa stanza, il tuo opponente ha perlopiù <b>NON COLLABORATO</b>."
+        else:
+            end_msg = "In questa stanza, il tuo opponente ha <b>COLLABORATO</b> e <b>NON COLLABORATO</b> lo stesso numero di volte."
+
+        # check if rooms are finished for this opponent
+        cursor.execute(("SELECT results, session_number FROM games WHERE player1 = ? AND player2 = ? "),
+                        (player_id, opponent))
+
+        rows = cursor.fetchall()
+        tot_sessions = 0
+        tot_gain = 0
+        for row in rows:
+            results = results_dict(row["results"])
+            for x in results:
+                try:
+                    tot_gain += payoff(results[x][player_id], results[x][opponent])
+                except:
+                    pass
+            tot_sessions += len(results)
+
+        if tot_sessions == row['session_number'] * 3:
+            end_msg += f"<br><br><b>Come risultato finale, hai guadagnato {round(tot_gain / 25, 1)} CFU.</b><br><br>Grazie per la partecipazione!<br>"
+
     return render_template("results.html",
                             wait=wait,
                             player_id=player_id,
                             room_id=room_id,
                             content=Markup(content),
+                            flag_end = flag_end,
+                            end_msg = Markup(end_msg),
                             suffix=suffix
                             )
+
+
+@app.route(f'{suffix}/relation/<player1>/<player2>', methods=("POST",))
+def relation(player1, player2):
+    """
+    record relation between player1 and player2
+    if not already present in DB
+    """
+
+    if request.method == "POST":
+        connection = sqlite3.connect(DB_FILE_NAME)
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO relations (player1, player2, known_personally, relationship ) VALUES (?,?,?,?)",
+                       (player1, player2, request.form['known_personally'], request.form['relation']))
+        connection.commit()
+
+        return redirect(f"{suffix}/room/{request.form['player_id']}/{request.form['room_id']}")
 
 
 @app.route(f'{suffix}/room/<player_id>/<room_id>')
@@ -101,14 +168,27 @@ def room(player_id, room_id):
     """
     let play a session of room room_id
     """
-
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, show_picture, results "
                     "FROM games WHERE room = ?"),
-                   (room_id, ))
+                    (room_id, ))
     row = cursor.fetchone()
+
+    # check if info about player are present in db
+    cursor.execute("SELECT * FROM relations WHERE player1 = ? AND player2 = ?", (row['player1'], row['player2'].replace("_computer", "")))
+    row_relation = cursor.fetchone()
+    if row_relation is None:
+        picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{row["player2"].replace("_computer", "")}.jpg">\n'
+        return render_template("relation.html",
+                        player1=row['player1'],
+                        player2=row['player2'].replace("_computer", ""),
+                        picture=Markup(picture),
+                        suffix=suffix,
+                        player_id=player_id,
+                        room_id=room_id
+                        )
 
     results = results_dict(row["results"])
 
@@ -125,20 +205,17 @@ def room(player_id, room_id):
     if player_id in results[session_idx]:
         return redirect(f"{suffix}/action/{results[session_idx][player_id]}/{player_id}/{room_id}/{session_idx}")
     else:
-        opponent = row["player1"] if row["player1"] != player_id else row["player2"]
+        opponent = row["player2"] if row["player1"] == player_id else row["player1"]
+        opponent_display = opponent.replace("_computer", "")
         if row["show_picture"]:
 
-
-            picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
-                       f'<script src="{app.static_url_path}/hide_image.js"></script>')
-
-            # picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent}.jpg">\n'
-
-
-            hide_image = f'<script>window.onload = function() {{ hide_image("imageID", {row["show_picture"] * 1000}); }}</script>'
-
-            # hide_image = ""
-
+            if row["show_picture"] > 0:
+                picture = (f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent_display}.jpg">\n'
+                           f'<script src="{app.static_url_path}/hide_image.js"></script>')
+                hide_image = f'<script>window.onload = function() {{ hide_image("imageID", {row["show_picture"] * 1000}); }}</script>'
+            else:  # show image forever
+                picture = f'<img id="imageID" src="{app.static_url_path}/pictures/{opponent_display}.jpg">\n'
+                hide_image = ""
         else:
             picture = ""
             hide_image = ""
@@ -147,7 +224,7 @@ def room(player_id, room_id):
                            room_id=room_id,
                            session_idx=session_idx,
                            player_id=player_id,
-                           opponent=opponent,
+                           opponent=opponent_display,
                            hide_image=Markup(hide_image),
                            picture=Markup(picture),
                            suffix=suffix
@@ -158,30 +235,63 @@ def room(player_id, room_id):
 def rooms(player_id):
     """
     list all the rooms for the player player_id
+
+    in this version
     """
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     cursor.execute(("SELECT room, player1, player2, session_number, results "
-                    "FROM games WHERE player1 = ? OR player2 = ?"),
-                   (player_id, player_id,))
-    rows = cursor.fetchall()
+                    "FROM games WHERE player1 = ? OR player2 = ? "
+                    "ORDER BY room "
+                    ),
+                   (player_id, player_id))
+
+    rows_sqlite = cursor.fetchall()
+    rows = [dict(row) for row in rows_sqlite]
+
+    opponents_list = sorted(list({row["player2"] for row in rows}))
+    
+    #seed = hash("|".join(opponents_list + [player_id]))  # add player id to personalize the sort order
+    seed = sum([ord(c)*(i+1) for c, i in zip(player_id, range(len(player_id)))])
+    random.seed(seed)
+    opponents_list_random = random.sample(opponents_list, len(opponents_list))
 
     content = ""
-    for row in rows:
-        results = results_dict(row["results"])
-        # check number of played sessions
-        played = len([x for x in results if len(results[x]) == 2])
-        # check if opponent is waiting
-        opponent_is_waiting = "Yes" if len([x for x in results if len(results[x]) == 1 and player_id not in results[x]]) else "No"
+    room_list = []
+    opponent_list = []
+    for opponent in opponents_list_random:
+        for row in rows:
+            if row['player2'] != opponent:
+                continue
+            results = results_dict(row["results"])
+            # check number of played sessions
+            played = len([x for x in results if len(results[x]) == 2])
+            if played == row["session_number"]:
+                continue
 
+            '''
+            # check if opponent is waiting
+            opponent_is_waiting = "Yes" if len([x for x in results if len(results[x]) == 1 and player_id not in results[x]]) else "No"
+            '''
 
-        to_be_played = row["session_number"] - played
-        content += (f'<tr><td><a href="{suffix}/room/{player_id}/{row["room"]}">room #{row["room"]}</a></td>'
-                    f'<td>{row["session_number"]}</td><td>{played}</td><td>{to_be_played}</td>'
-                    f'<td>{opponent_is_waiting}</td>'
-                    '</tr>'
-                    )
+            to_be_played = row["session_number"] - played
+            if row['player2'] not in opponent_list:
+                room_list.append(row['room'])
+                opponent_list.append(row['player2'])
+
+                content += (f'<tr><td><a href="{suffix}/room/{player_id}/{row["room"]}">stanza #{row["room"]}</a></td>'
+                f'<td class="text-center">{row["player2"].replace("_computer", "")}</td>'
+                        f'<td class="text-center">{row["session_number"]}</td>'
+                        f'<td class="text-center" >{played}</td>'
+                        f'<td class="text-center">{to_be_played}</td>'
+                        # f'<td>{opponent_is_waiting}</td>'
+                        '</tr>'
+                        )
+                break
+
+        if content:
+            break
 
     if rows:
         return render_template("rooms.html",
@@ -198,25 +308,24 @@ def rooms(player_id):
 
 @app.route(f'{suffix}/player_id', methods=("POST", "GET"))
 def func_player_id():
+    """
+    login with player ID
+    """
+
     if request.method == "POST":
         player_id = request.form["player_id"]
 
-        connection = sqlite3.connect("prisoner_dilemma.db")
+        connection = sqlite3.connect(DB_FILE_NAME) 
         connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
         cursor.execute("SELECT id, name FROM players WHERE id = ?",
                        (player_id, ))
         row = cursor.fetchone()
-        if not row:
-            return f"Player {player_id} not found"
+        if row is None:
+            return render_template("home.html",
+                                   msg=Markup("<h4>L'id del giocatore non è stato trovato!<br>Riprova rispettando le maiuscole/minuscole.</h4>"))
 
     return redirect(f"{suffix}/rooms/{player_id}")
-
-    '''
-    return render_template("player.html",
-                           player_id=player_id
-                         )
-    '''
 
 
 @app.route(f'{suffix}/admin')
@@ -225,16 +334,69 @@ def admin():
     administration page
     """
 
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     rows = cursor.execute("SELECT id, name FROM players").fetchall()
 
-    content = '<table class="table"><thead><tr><th>Players</th><th>Pictures</th><th>URL FOR rooms list</th></tr><thead>'
+    content = '<table class="table"><thead><tr><th>Players</th><th>Pictures</th><th>Player id</th></tr><thead>\n'
     for row in rows:
-        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="{app.static_url_path}/pictures/{row["id"]}.jpg"></td><td>{row["id"]}</td></tr>'
+        content += f'<tr><td>{row["name"]}</td><td><img width="120px" src="{app.static_url_path}/pictures/{row["id"]}.jpg"></td><td>{row["id"]}</td></tr>\n'
 
     return render_template("admin.html",
+                           content = Markup(content),
+                           suffix=suffix)
+
+
+@app.route(f'{suffix}/monitor_compact')
+def monitor_compact():
+    """
+    monitor all games/sessions
+    """
+
+    connection = sqlite3.connect(DB_FILE_NAME)
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    rows = cursor.execute("SELECT room, player1, player2, session_number, show_picture, results FROM games").fetchall()
+
+    content = f""
+
+    content += '<table class="table">'
+    content += ('<thead><tr><th class="text-left">Room</th><th class="text-left">number of sessions</th><th class="text-left">played</th>'
+                '<th class="text-left">player 1</th><th class="text-left">points player 1</th>'
+                '<th class="text-left">player 2</th><th class="text-left">points player 2</th>'
+                '<th>Details</th>'
+                '</tr></thead>\n'
+               )
+    for row in rows:
+
+        results = results_dict(row['results'])
+        n_played = sum([1 for x in results if len(results[x]) == 2])
+        # pay off
+        payoff_p1 = 0
+        payoff_p2 = 0
+        for x in results:
+            if len(results[x]) == 2:
+                payoff_p1 += payoff(results[x][row["player1"]], results[x][row["player2"]])
+                payoff_p2 += payoff(results[x][row["player2"]], results[x][row["player1"]])
+
+        content += f'<tr><td class="text-left">{row["room"]}</td>'
+        content += f'<td class="text-left">{row["session_number"]}</td>'
+        content += f'<td class="text-left">{n_played}</td>'
+
+        content += f'<td class="text-left">{row["player1"]}</td><td class="text-left">{payoff_p1}</td>'
+        content += f'<td class="text-left">{row["player2"]}</td><td class="text-left">{payoff_p2}</td>'
+
+        content += '<td>' + (" ".join([results[x][row['player1']] for x in results if row['player1'] in results[x]])) + '<br>'
+        content += (" ".join([results[x][row['player2']] for x in results if row['player2'] in results[x]])) + "</td>"
+        content += "</tr>"
+
+
+    content += '</table>'
+
+
+
+    return render_template("monitor.html",
                            content = Markup(content),
                            suffix=suffix)
 
@@ -245,7 +407,7 @@ def monitor():
     monitor all games/sessions
     """
 
-    connection = sqlite3.connect("prisoner_dilemma.db")
+    connection = sqlite3.connect(DB_FILE_NAME)
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
     rows = cursor.execute("SELECT room, player1, player2, session_number, show_picture, results FROM games").fetchall()
@@ -263,23 +425,28 @@ def monitor():
                 payoff_p1 += payoff(results[x][row["player1"]], results[x][row["player2"]])
                 payoff_p2 += payoff(results[x][row["player2"]], results[x][row["player1"]])
 
+        content += '<div class="card"><div class="card-body"><b>'
         content += (f"Room #{row['room']} "
                     f"Number of sessions: {row['session_number']}  (played: {n_played}) "
-                    f"Show picture of player: {row['show_picture']} s"
+                    #f"Show picture of player: {row['show_picture']} s"
                    )
+        content += '</b>'
 
         content += '<table class="table">'
-        content += '<thead><tr><th>Players</th><th>Points</th><th colspan="25">Sessions</th></tr></thead>'
+        content += '<thead><tr><th>Players</th><th>Points</th><th colspan="25">Sessions</th></tr></thead>\n'
 
 
-        content += f'<tr><td>{row["player1"]}</td><td>{payoff_p1}</td><td>' + ("</td><td>".join([results[x][row['player1']] for x in results if row['player1'] in results[x]])) + "</td></tr>"
-        content += f'<tr><td>{row["player2"]}</td><td>{payoff_p2}</td><td>' + ("</td><td>".join([results[x][row['player2']] for x in results if row['player2'] in results[x]])) + "</td></tr>"
+        content += f'<tr><td>{row["player1"]}</td><td>{payoff_p1}</td><td>' + (" ".join([results[x][row['player1']] for x in results if row['player1'] in results[x]])) + "</td></tr>"
+        content += f'<tr><td>{row["player2"]}</td><td>{payoff_p2}</td><td>' + (" ".join([results[x][row['player2']] for x in results if row['player2'] in results[x]])) + "</td></tr>"
 
         content += '</table>'
+
+        content += '</div></div>'
 
     return render_template("monitor.html",
                            content = Markup(content),
                            suffix=suffix)
+
 
 @app.route(suffix + '/')
 @app.route(suffix)
