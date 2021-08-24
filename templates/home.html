@@ -17,7 +17,7 @@
 <main>
 <div class="container">
 
-<h1>Gioco del dilemma del prigioniero</h1>
+<h1>Prisoner's Dilemma game</h1>
 <hr>
 
 
@@ -25,33 +25,33 @@
 
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Giocherai al “Dilemma del Prigioniero”, conosci questo gioco?<br></h5>
+    <h5 class="card-title">You will play the “Prisoner's Dilemma”, do you know this game?<br></h5>
     <p class="card-text">
-Nel “Dilemma del Prigioniero” i due giocatori si trovano in stanze diverse e non hanno possibilità di comunicare tra loro.<br>
+In the "Prisoner's Dilemma" the two players are in different rooms and cannot communicate with each other.<br>
 
-Per ogni gioco, ad ognuno di loro vengono date due scelte: collaborare o non collaborare con l’altro giocatore.<br>
+For each game, each of them is given two choices: to collaborate or not to collaborate with the other player.<br>
 
-Queste due scelte portano a risultati diversi, sulla base della propria scelta E della scelta dell’altro giocatore.<br>
+These two choices lead to different results, based on your choice AND the choice of the other player.<br>
 <br>
-Tra poco giocherai al “Dilemma del Prigioniero” per ottenere Crediti Formativi Universitari (CFU).
-Il numero di CFU ottenuti da te e dall’altro giocatore dipende sia dal tuo gioco (scelta: collaborare o non collaborare)
- sia dal gioco dell’altro giocatore (scelta: collaborare o non collaborare).<br>
+Soon you will play the “Prisoner's Dilemma” to obtain University Training Credits (CFU). 
+The number of credits obtained by you and the other player depends on both your game (choice: collaborate or not collaborate) 
+        and the other player's game (choice: collaborate or not collaborate).<br>
  
  <!--
- Qui giocherai sulla base di questa tabella che mostra il numero di CFU che puoi ottenere:
+ Here you will play based on this table which shows the number of CFUs you can get:
  -->
 
- Ogni CFU vale <b>25 ore</b>.
- Qui giocherai sulla base di questa tabella che mostra il <b>numero di ore</b> che puoi ottenere per ottenere i CFU.
+ Each CFU is worth <b>25 hours</b>.
+ Here you will play based on this table which shows the <b>number of hours</b> that you can obtain to obtain CFUs.
 
  
 <table class="table" border="1">
 
-<tr><td></td><td class="text-center">L'altro collabora</td><td class="text-center">L'altro NON collabora</td></tr>
+<tr><td></td><td class="text-center">the other cooperates</td><td class="text-center">the other does NOT cooperate</td></tr>
 
-<tr><td style="color:red">TU collabori</td><td class="text-center"><span style="color:red"><b>3</b></span>; 3</td class="text-center"><td class="text-center"><span style="color:red"><b>1</b></span>; 4</td></tr>
+<tr><td style="color:red">YOU cooperate</td><td class="text-center"><span style="color:red"><b>3</b></span>; 3</td class="text-center"><td class="text-center"><span style="color:red"><b>1</b></span>; 4</td></tr>
 
-<tr><td style="color:red">TU NON collabori</td><td class="text-center"><span style="color:red"><b>4</b></span>; 1</td><td class="text-center"><span style="color:red"><b>2</b></span>; 2</td></tr>
+<tr><td style="color:red">YOU DO NOT cooperate</td><td class="text-center"><span style="color:red"><b>4</b></span>; 1</td><td class="text-center"><span style="color:red"><b>2</b></span>; 2</td></tr>
 
 
 </table>
@@ -66,11 +66,11 @@ Il numero di CFU ottenuti da te e dall’altro giocatore dipende sia dal tuo gio
 <form action="/prisoner/player_id" method="POST">
 
 <div class="form-group">
-<label for="player_id"><h2>Immetti il tuo ID e premi il pulsante per cominciare</h2></label>
+<label for="player_id"><h2>Enter your ID and press the button to get started</h2></label>
 <input type="text" class="form-control" id="player_id" name="player_id">
 </div>
 
-<button type="submit" class="btn btn-primary">Giocare</button>
+<button type="submit" class="btn btn-primary">Play</button>
 
 </form>
 
