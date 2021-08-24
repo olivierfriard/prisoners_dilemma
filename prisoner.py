@@ -90,8 +90,8 @@ def action(player_action, player_id, room_id, session_idx):
         # disabled for blind play
         opponent_action = results[session_idx][opponent]
         gain = payoff(player_action, opponent_action)
-        content = (f'Hai scelto di <b>{actions_list[player_action]}</b> e l\'altro partecipante ha scelto di <b>{actions_list[opponent_action]}</b>.<br>'
-                    f"Come risultato, hai guadagnato {gain} ore. "
+        content = (f'you chose to <b>{actions_list[player_action]}</b> and the\ other participant chose to <b>{actions_list[opponent_action]}</b>.<br>'
+                    f"As a result, you have earned {gain} hours. "
                     )
         '''
         content = ""
@@ -109,11 +109,11 @@ def action(player_action, player_id, room_id, session_idx):
                     continue
                 results_str += results[result][player]
         if results_str.count("C") > results_str.count("D"):
-            end_msg = "In questa stanza, il tuo opponente ha perlopiù <b>COLLABORATO</b>."
+            end_msg = "In this room, your opponent mostly has <b>COOPERATE</b>."
         elif results_str.count("C") < results_str.count("D"):
-            end_msg = "In questa stanza, il tuo opponente ha perlopiù <b>NON COLLABORATO</b>."
+            end_msg = "In this room, your opponent mostly has <b>NOT COOPERATE</b>."
         else:
-            end_msg = "In questa stanza, il tuo opponente ha <b>COLLABORATO</b> e <b>NON COLLABORATO</b> lo stesso numero di volte."
+            end_msg = "In this room, your opponent mostly has <b>COOPERATE</b> e <b>NOT COOPERATE</b> the same number of times."
 
         # check if rooms are finished for this opponent
         cursor.execute(("SELECT results, session_number FROM games WHERE player1 = ? AND player2 = ? "),
@@ -132,7 +132,7 @@ def action(player_action, player_id, room_id, session_idx):
             tot_sessions += len(results)
 
         if tot_sessions == row['session_number'] * 3:
-            end_msg += f"<br><br><b>Come risultato finale, hai guadagnato {round(tot_gain / 25, 1)} CFU.</b><br><br>Grazie per la partecipazione!<br>"
+            end_msg += f"<br><br><b>As a final result, you have earned {round(tot_gain / 25, 1)} CFU.</b><br><br>Thank you for participating!<br>"
 
     return render_template("results.html",
                             wait=wait,
