@@ -21,7 +21,9 @@ INSERT INTO players (id, name) VALUES
 ('AM','gruppo_3'),
 ('GG','gruppo_3'),
 ('FB','gruppo_3'),
-('VL','gruppo_3');
+('VL','gruppo_3'),
+('MB','gruppo_4'),
+('RB','gruppo_4);
 
 DROP TABLE IF EXISTS relations;
 CREATE TABLE relations (player1 text, player2 text, known_personally text, relationship text);
@@ -352,5 +354,12 @@ INSERT INTO games (room, player1, player2, session_number, show_picture) VALUES
 (267, 'VL', 'FBS_computer', 10, -1),
 (268, 'VL', 'CP_computer', 10, -1),
 (269, 'VL', 'FR_computer', 10, -1),
-(270, 'VL', 'CE_computer', 10, -1);
+(270, 'VL', 'CE_computer', 10, -1),
+
+(271, 'MB', 'RR_computer', 10, -1),
+(272, 'MB', 'RR_computer', 10, -1),
+
+(273, 'RB', 'RR_computer', 10, -1),
+(274, 'RB', 'RR_computer', 10, -1);
+
 
