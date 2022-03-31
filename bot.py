@@ -1,5 +1,10 @@
 """
 playing bot for the prisoner dilemma
+
+Launching the bot:
+screen python3 bot.py /home/ofriard/prisoner_dilemma/src/prisoner_dilemma.db
+
+
 """
 
 __version__ = "2021-05-13"
